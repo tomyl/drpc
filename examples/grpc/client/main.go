@@ -6,6 +6,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"google.golang.org/grpc"
@@ -31,19 +32,26 @@ func Main(ctx context.Context) error {
 	// make a grpc proto-specific client
 	client := pb.NewCookieMonsterClient(conn)
 
-	// set a deadline for the operation
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
-	defer cancel()
+	for _, d := range []time.Duration{1, 3} {
+		log.Println(conn.GetState())
+		func() {
+			// set a deadline for the operation
+			ctx, cancel := context.WithTimeout(ctx, d*time.Second)
+			defer cancel()
 
-	// run the RPC
-	crumbs, err := client.EatCookie(ctx, &pb.Cookie{
-		Type: pb.Cookie_Oatmeal,
-	})
-	if err != nil {
-		return err
+			// run the RPC
+			crumbs, err := client.EatCookie(ctx, &pb.Cookie{
+				Type: pb.Cookie_Oatmeal,
+			})
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			// check the results
+			_, err = fmt.Println(crumbs.Cookie.Type.String())
+		}()
 	}
 
-	// check the results
-	_, err = fmt.Println(crumbs.Cookie.Type.String())
-	return err
+	return nil
 }

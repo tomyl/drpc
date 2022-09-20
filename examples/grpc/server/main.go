@@ -6,6 +6,7 @@ package main
 import (
 	"context"
 	"net"
+	"time"
 
 	"google.golang.org/grpc"
 
@@ -19,6 +20,7 @@ type CookieMonsterServer struct {
 
 // EatCookie turns a cookie into crumbs.
 func (s *CookieMonsterServer) EatCookie(ctx context.Context, cookie *pb.Cookie) (*pb.Crumbs, error) {
+	time.Sleep(2 * time.Second)
 	return &pb.Crumbs{
 		Cookie: cookie,
 	}, nil
